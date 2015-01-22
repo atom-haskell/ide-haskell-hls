@@ -1,0 +1,5 @@
+{ "extends": "atom-haskell-tslint-rules",
+  "rules": {
+    "no-unsafe-any": true
+  }
+ }
