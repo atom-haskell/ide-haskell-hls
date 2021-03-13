@@ -1,8 +1,8 @@
 {
   "name": "ide-haskell-hls",
   "main": "./lib/main",
-  "version": "0.0.1",
-  "description": "Provides HIE backends for ide-haskell and autocomplete-haskell",
+  "version": "0.0.0",
+  "description": "(Alpha) Provides Haskell Language Server powered backend for ide-haskell",
   "keywords": [
     "ide-haskell",
     "ide",
@@ -11,7 +11,7 @@
     "HLS",
     "backend"
   ],
-  "repository": "https://github.com/atom-haskell/ide-haskell-hie",
+  "repository": "https://github.com/atom-haskell/ide-haskell-hls",
   "license": "MIT",
   "engines": {
     "atom": ">=1.55.0 <2.0.0"
