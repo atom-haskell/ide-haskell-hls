@@ -38,9 +38,14 @@
         "^0.3.2": "consumeUPI"
       }
     },
-    "atom-ide-busy-signal": {
+    "markdown-renderer": {
       "versions": {
-        "0.1.0": "consumeBusySignal"
+        "1.0.0": "consumeMarkdownRenderer"
+      }
+    },
+    "busy-signal": {
+      "versions": {
+        "1.0.0": "consumeBusySignal"
       }
     },
     "console": {

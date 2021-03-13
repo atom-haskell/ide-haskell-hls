@@ -2,9 +2,11 @@ import { AutoLanguageClient } from 'atom-languageclient'
 import { TextEditor, Point } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import { datatipAdapter, linterAdapter } from './adapters'
+import type { MarkdownService } from 'atom-ide-base'
 
 class HLSLanguageClient extends AutoLanguageClient {
   private upi?: UPI.IUPIInstance
+  private renderer = { render: null as MarkdownService['render'] | null }
   getGrammarScopes() {
     return ['source.haskell']
   }
@@ -21,12 +23,17 @@ class HLSLanguageClient extends AutoLanguageClient {
     })
   }
 
+  consumeMarkdownRenderer(renderer: MarkdownService) {
+    console.log(renderer)
+    this.renderer.render = renderer.render
+  }
+
   consumeUPI(service: UPI.IUPIRegistration) {
     this.upi = service({
       name: 'hls',
     })
     this.consumeLinterV2(linterAdapter(this.upi))
-    this.consumeDatatip(datatipAdapter(service, this.upi))
+    this.consumeDatatip(datatipAdapter(service, this.upi, this.renderer))
     return this.upi
   }
   //////////////////////////// overrides ///////////////////////////////

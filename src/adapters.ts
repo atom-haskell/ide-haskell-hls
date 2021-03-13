@@ -1,7 +1,8 @@
-import * as AtomIDE from 'atom-ide-base'
-import * as Linter from 'atom/linter'
 import { Emitter, Disposable } from 'atom'
 import * as UPI from 'atom-haskell-upi'
+import type * as AtomIDE from 'atom-ide-base'
+import type * as Linter from 'atom/linter'
+import type { MarkdownService } from 'atom-ide-base'
 
 export function linterAdapter(
   upi: UPI.IUPIInstance,
@@ -10,7 +11,7 @@ export function linterAdapter(
     let messages: Linter.Message[] = []
     const emitter = new Emitter()
     const delegate: Linter.IndieDelegate = {
-      name: config.name,
+      name: 'hls',
       clearMessages() {
         messages = []
         upi.setMessages([])
@@ -60,7 +61,18 @@ export function linterAdapter(
 export function datatipAdapter(
   register: UPI.IUPIRegistration,
   upi: UPI.IUPIInstance,
+  renderer: { render: MarkdownService['render'] | null },
 ): AtomIDE.DatatipService {
+  async function renderMarkedString(str: AtomIDE.MarkedString) {
+    if (renderer.render) {
+      return { html: await renderer.render(str.value, 'source.haskell') }
+    } else {
+      return { text: str.value }
+    }
+  }
+  async function renderMarkedStrings(strs: AtomIDE.MarkedString[]) {
+    return await Promise.all(strs.map(renderMarkedString))
+  }
   return {
     addModifierProvider() {
       // not implemented
@@ -70,7 +82,7 @@ export function datatipAdapter(
     },
     addProvider(provider) {
       const providerUpi = register({
-        name: provider.providerName,
+        name: 'hls',
         tooltip: {
           priority: provider.priority,
           eventTypes: [UPI.TEventRangeType.mouse],
@@ -84,7 +96,7 @@ export function datatipAdapter(
               return {
                 persistent: datatip.pinnable,
                 range: datatip.range,
-                text: datatip.markedStrings.map((x) => x.value),
+                text: await renderMarkedStrings(datatip.markedStrings),
               }
             }
             return undefined
@@ -95,14 +107,16 @@ export function datatipAdapter(
     },
     createPinnedDataTip(tip, editor) {
       if ('markedStrings' in tip) {
-        upi
-          .showTooltip({
-            editor,
-            tooltip: {
-              persistent: tip.pinnable,
-              range: tip.range,
-              text: tip.markedStrings.map((x) => x.value), // TODO: highlight
-            },
+        renderMarkedStrings(tip.markedStrings)
+          .then((text) => {
+            upi.showTooltip({
+              editor,
+              tooltip: {
+                persistent: tip.pinnable,
+                range: tip.range,
+                text,
+              },
+            })
           })
           .catch((e: Error) => {
             console.error(e)
