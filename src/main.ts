@@ -24,7 +24,6 @@ class HLSLanguageClient extends AutoLanguageClient {
   }
 
   consumeMarkdownRenderer(renderer: MarkdownService) {
-    console.log(renderer)
     this.renderer.render = renderer.render
   }
 
