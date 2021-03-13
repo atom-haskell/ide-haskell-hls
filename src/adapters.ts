@@ -1,4 +1,4 @@
-import { Emitter, Disposable } from 'atom'
+import { Emitter, Disposable, Range } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import type * as AtomIDE from 'atom-ide-base'
 import type * as Linter from 'atom/linter'
@@ -6,7 +6,44 @@ import type { MarkdownService } from 'atom-ide-base'
 
 export function linterAdapter(
   upi: UPI.IUPIInstance,
+  actions: AtomIDE.CodeActionProvider,
 ): Parameters<Linter.IndieProvider>[0] {
+  function convertMessages(msg: Linter.Message) {
+    return {
+      message: { highlighter: 'hint.message.haskell', text: msg.excerpt },
+      position: msg.location.position.start,
+      uri: msg.location.file,
+      severity: msg.severity,
+      actions: async () => {
+        const pane = atom.workspace.paneForURI(msg.location.file)
+        const editor = pane?.itemForURI(msg.location.file)
+        if (editor && atom.workspace.isTextEditor(editor)) {
+          const acts = await actions.getCodeActions(
+            editor,
+            msg.location.position,
+            [
+              {
+                filePath: msg.location.file,
+                providerName: 'hls',
+                range: msg.location.position,
+                text: msg.excerpt,
+                type: 'Info',
+              },
+            ],
+          )
+          if (!acts) return []
+          return Promise.all(
+            acts.map(async (a) => ({
+              title: await a.getTitle(),
+              apply: () => a.apply(),
+            })),
+          )
+        } else {
+          return []
+        }
+      },
+    }
+  }
   return function (config: Linter.Config) {
     let messages: Linter.Message[] = []
     const emitter = new Emitter()
@@ -33,25 +70,11 @@ export function linterAdapter(
       },
       setAllMessages(msgs) {
         messages = msgs
-        upi.setMessages(
-          messages.map((msg) => ({
-            message: msg.excerpt,
-            position: msg.location.position.start,
-            uri: msg.location.file,
-            severity: msg.severity,
-          })),
-        )
+        upi.setMessages(messages.map(convertMessages))
       },
       setMessages(uri, msgs) {
         messages = messages.filter((x) => x.location.file !== uri).concat(msgs)
-        upi.setMessages(
-          messages.map((msg) => ({
-            message: { highlighter: 'hint.message.haskell', text: msg.excerpt },
-            position: msg.location.position.start,
-            uri: msg.location.file,
-            severity: msg.severity,
-          })),
-        )
+        upi.setMessages(messages.map(convertMessages))
       },
     }
     return delegate

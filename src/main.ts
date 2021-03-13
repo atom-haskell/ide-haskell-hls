@@ -31,7 +31,7 @@ class HLSLanguageClient extends AutoLanguageClient {
     this.upi = service({
       name: 'hls',
     })
-    this.consumeLinterV2(linterAdapter(this.upi))
+    this.consumeLinterV2(linterAdapter(this.upi, this.provideCodeActions()))
     this.consumeDatatip(datatipAdapter(service, this.upi, this.renderer))
     return this.upi
   }
