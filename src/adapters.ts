@@ -1,4 +1,4 @@
-import { Emitter, Disposable, Range } from 'atom'
+import { Emitter, Disposable } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import type * as AtomIDE from 'atom-ide-base'
 import type * as Linter from 'atom/linter'
@@ -44,7 +44,7 @@ export function linterAdapter(
       },
     }
   }
-  return function (config: Linter.Config) {
+  return function (_config: Linter.Config) {
     let messages: Linter.Message[] = []
     const emitter = new Emitter()
     const delegate: Linter.IndieDelegate = {
