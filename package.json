@@ -32,9 +32,10 @@
     "atom-languageclient": "^1.2.2"
   },
   "consumedServices": {
-    "linter-indie": {
+    "ide-haskell-upi": {
+      "description": "Uses ide-haskell's unified pluggable interface",
       "versions": {
-        "2.0.0": "consumeLinterV2"
+        "^0.3.2": "consumeUPI"
       }
     },
     "atom-ide-busy-signal": {
@@ -45,11 +46,6 @@
     "console": {
       "versions": {
         "0.1.0": "consumeConsole"
-      }
-    },
-    "datatip": {
-      "versions": {
-        "0.1.0": "consumeDatatip"
       }
     },
     "signature-help": {
