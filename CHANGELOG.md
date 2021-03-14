@@ -1,3 +1,16 @@
+## 0.0.2
+
+-   Remove code actions provider export (handled internally via ide-haskell)
+-   Add selection to action activators
+-   Fix lint severity
+-   Untie actions from tooltips
+-   Intial support for standalone actions
+-   Lints
+-   Crude actions support
+-   Remove coffeelint; fix license year
+-   Remove bogus travis config
+-   Remove debug console.log
+
 ## 2.2.3
 
 -   Handle lint and check messages separately
