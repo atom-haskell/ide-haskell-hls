@@ -1,3 +1,9 @@
+## 0.0.4
+
+-   Split adapters
+-   Fix hlint code actions
+-   Simplify config definition a little
+
 ## 0.0.3
 
 -   Add HLS settings
