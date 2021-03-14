@@ -48,7 +48,7 @@ function convertMessages(msg: Linter.Message): UPI.IResultItem {
     message: { highlighter: 'hint.message.haskell', text: msg.excerpt },
     position: msg.location.position.start,
     uri: msg.location.file,
-    severity: msg.severity,
+    severity: msg.severity === 'info' ? 'lint' : msg.severity,
   }
 }
 
