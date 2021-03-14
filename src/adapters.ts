@@ -4,80 +4,51 @@ import type * as AtomIDE from 'atom-ide-base'
 import type * as Linter from 'atom/linter'
 import type { MarkdownService } from 'atom-ide-base'
 
-export function linterAdapter(
-  upi: UPI.IUPIInstance,
-  actions: AtomIDE.CodeActionProvider,
-): Parameters<Linter.IndieProvider>[0] {
-  function convertMessages(msg: Linter.Message) {
-    return {
-      message: { highlighter: 'hint.message.haskell', text: msg.excerpt },
-      position: msg.location.position.start,
-      uri: msg.location.file,
-      severity: msg.severity,
-      actions: async () => {
-        const pane = atom.workspace.paneForURI(msg.location.file)
-        const editor = pane?.itemForURI(msg.location.file)
-        if (editor && atom.workspace.isTextEditor(editor)) {
-          const acts = await actions.getCodeActions(
-            editor,
-            msg.location.position,
-            [
-              {
-                filePath: msg.location.file,
-                providerName: 'hls',
-                range: msg.location.position,
-                text: msg.excerpt,
-                type: 'Info',
-              },
-            ],
-          )
-          if (!acts) return []
-          return Promise.all(
-            acts.map(async (a) => ({
-              title: await a.getTitle(),
-              apply: () => a.apply(),
-            })),
-          )
-        } else {
-          return []
-        }
-      },
-    }
+export class LinterAdapter implements Linter.IndieDelegate {
+  public name = 'hls'
+  private emitter = new Emitter()
+  private messages: Linter.Message[] = []
+  constructor(private upi: UPI.IUPIInstance) {}
+  dispose() {
+    this.emitter.emit('did-destroy')
+    this.emitter.dispose()
+    this.upi.dispose()
   }
-  return function (_config: Linter.Config) {
-    let messages: Linter.Message[] = []
-    const emitter = new Emitter()
-    const delegate: Linter.IndieDelegate = {
-      name: 'hls',
-      clearMessages() {
-        messages = []
-        upi.setMessages([])
-        emitter.emit('did-update')
-      },
-      getMessages() {
-        return messages
-      },
-      dispose() {
-        emitter.emit('did-destroy')
-        emitter.dispose()
-        upi.dispose()
-      },
-      onDidDestroy(callback) {
-        return emitter.on('did-destroy', callback)
-      },
-      onDidUpdate(callback) {
-        return emitter.on('did-update', callback)
-      },
-      setAllMessages(msgs) {
-        messages = msgs
-        upi.setMessages(messages.map(convertMessages))
-      },
-      setMessages(uri, msgs) {
-        messages = messages.filter((x) => x.location.file !== uri).concat(msgs)
-        upi.setMessages(messages.map(convertMessages))
-      },
-    }
-    return delegate
+  clearMessages() {
+    this.messages = []
+    this.updateMessages()
+  }
+  getMessages() {
+    return this.messages
+  }
+  onDidDestroy(callback: (value?: any) => void) {
+    return this.emitter.on('did-destroy', callback)
+  }
+  onDidUpdate(callback: (value?: any) => void) {
+    return this.emitter.on('did-update', callback)
+  }
+  setAllMessages(msgs: Linter.Message[]) {
+    this.messages = msgs
+    this.updateMessages()
+  }
+  setMessages(uri: string, msgs: ConcatArray<Linter.Message>) {
+    this.messages = this.messages
+      .filter((x) => x.location.file !== uri)
+      .concat(msgs)
+    this.updateMessages()
+  }
+  private updateMessages() {
+    this.upi.setMessages(this.messages.map(convertMessages))
+    this.emitter.emit('did-update')
+  }
+}
+
+function convertMessages(msg: Linter.Message): UPI.IResultItem {
+  return {
+    message: { highlighter: 'hint.message.haskell', text: msg.excerpt },
+    position: msg.location.position.start,
+    uri: msg.location.file,
+    severity: msg.severity,
   }
 }
 

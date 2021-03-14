@@ -1,7 +1,7 @@
 import { AutoLanguageClient } from 'atom-languageclient'
-import { TextEditor, Point } from 'atom'
+import { TextEditor, Point, Range } from 'atom'
 import * as UPI from 'atom-haskell-upi'
-import { datatipAdapter, linterAdapter } from './adapters'
+import { datatipAdapter, LinterAdapter } from './adapters'
 import type { MarkdownService } from 'atom-ide-base'
 
 class HLSLanguageClient extends AutoLanguageClient {
@@ -28,20 +28,50 @@ class HLSLanguageClient extends AutoLanguageClient {
   }
 
   consumeUPI(service: UPI.IUPIRegistration) {
+    let la: LinterAdapter
+    function getRelevantMessages(editor: TextEditor, range: Range) {
+      const messages = la.getMessages()
+      const path = editor.getPath()
+      return messages
+        .filter(
+          (x) =>
+            x.location.file === path &&
+            range.intersectsWith(x.location.position),
+        )
+        .map((x) => ({
+          filePath: x.location.file,
+          providerName: 'hls',
+          range: x.location.position,
+          text: x.excerpt,
+          type: 'Info' as const, // irrelevant, but required
+        }))
+    }
     this.upi = service({
       name: 'hls',
-      actions: async (editor, range, _type) => {
-        const acts = await this.getCodeActions(editor, range, [])
-        if (!acts) return undefined
-        return Promise.all(
-          acts.map(async (x) => ({
-            title: await x.getTitle(),
-            apply: () => x.apply(),
-          })),
-        )
+      actions: {
+        priority: 50,
+        eventTypes: [
+          UPI.TEventRangeType.context,
+          UPI.TEventRangeType.keyboard,
+          UPI.TEventRangeType.mouse,
+        ],
+        handler: async (editor, range, type) => {
+          const msgs = getRelevantMessages(editor, range)
+          if (type === UPI.TEventRangeType.keyboard && !msgs.length)
+            return undefined
+          const acts = await this.getCodeActions(editor, range, msgs)
+          if (!acts) return undefined
+          return Promise.all(
+            acts.map(async (x) => ({
+              title: await x.getTitle(),
+              apply: () => x.apply(),
+            })),
+          )
+        },
       },
     })
-    this.consumeLinterV2(linterAdapter(this.upi, this.provideCodeActions()))
+    la = new LinterAdapter(this.upi)
+    this.consumeLinterV2(() => la)
     this.consumeDatatip(datatipAdapter(service, this.upi, this.renderer))
     return this.upi
   }
