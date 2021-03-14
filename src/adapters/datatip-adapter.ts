@@ -1,16 +1,21 @@
 import { Disposable } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import type * as AtomIDE from 'atom-ide-base'
-import type { MarkdownService } from 'atom-ide-base'
 
 export function datatipAdapter(
   register: UPI.IUPIRegistration,
   upi: UPI.IUPIInstance,
-  renderer: { render: MarkdownService['render'] | null },
+  renderer: { render: any },
 ): AtomIDE.DatatipService {
-  async function renderMarkedString(str: AtomIDE.MarkedString) {
+  async function renderMarkedString(
+    str: AtomIDE.MarkedString,
+  ): Promise<UPI.TMessage> {
     if (renderer.render) {
-      return { html: await renderer.render(str.value, 'source.haskell') }
+      return {
+        html: await renderer.render(str.value, 'source.haskell', {
+          ALLOW_UNKNOWN_PROTOCOLS: true,
+        }),
+      }
     } else {
       return { text: str.value }
     }

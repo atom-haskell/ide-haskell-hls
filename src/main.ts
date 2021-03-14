@@ -13,7 +13,11 @@ const severityToDiagnosticType = {
 
 class HLSLanguageClient extends AutoLanguageClient {
   private upi?: UPI.IUPIInstance
-  private renderer = { render: null as MarkdownService['render'] | null }
+  private renderer = {
+    render: null as
+      | null
+      | ((source: string, text: string, config: object) => Promise<string>),
+  }
   public config = config
   getGrammarScopes() {
     return ['source.haskell']
@@ -35,7 +39,7 @@ class HLSLanguageClient extends AutoLanguageClient {
   }
 
   consumeMarkdownRenderer(renderer: MarkdownService) {
-    this.renderer.render = renderer.render
+    this.renderer.render = renderer.render as any
   }
 
   consumeUPI(service: UPI.IUPIRegistration) {

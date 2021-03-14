@@ -40,7 +40,7 @@
     },
     "markdown-renderer": {
       "versions": {
-        "1.0.0": "consumeMarkdownRenderer"
+        "^1.0.0": "consumeMarkdownRenderer"
       }
     },
     "atom-ide-busy-signal": {
