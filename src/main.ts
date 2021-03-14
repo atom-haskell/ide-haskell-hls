@@ -54,6 +54,7 @@ class HLSLanguageClient extends AutoLanguageClient {
           UPI.TEventRangeType.context,
           UPI.TEventRangeType.keyboard,
           UPI.TEventRangeType.mouse,
+          UPI.TEventRangeType.selection,
         ],
         handler: async (editor, range, type) => {
           const msgs = getRelevantMessages(editor, range)
