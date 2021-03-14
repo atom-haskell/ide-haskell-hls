@@ -3,10 +3,12 @@ import { TextEditor, Point, Range } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import { datatipAdapter, LinterAdapter } from './adapters'
 import type { MarkdownService } from 'atom-ide-base'
+import { config } from './config'
 
 class HLSLanguageClient extends AutoLanguageClient {
   private upi?: UPI.IUPIInstance
   private renderer = { render: null as MarkdownService['render'] | null }
+  public config = config
   getGrammarScopes() {
     return ['source.haskell']
   }
@@ -15,6 +17,9 @@ class HLSLanguageClient extends AutoLanguageClient {
   }
   getServerName() {
     return 'haskell-language-server'
+  }
+  getRootConfigurationKey() {
+    return 'ide-haskell-hls'
   }
 
   startServerProcess(projectPath: any) {
