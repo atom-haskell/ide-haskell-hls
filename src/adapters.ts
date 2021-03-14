@@ -107,8 +107,11 @@ export function datatipAdapter(
       const providerUpi = register({
         name: 'hls',
         tooltip: {
-          priority: provider.priority,
-          eventTypes: [UPI.TEventRangeType.mouse],
+          priority: 100,
+          eventTypes: [
+            UPI.TEventRangeType.mouse,
+            UPI.TEventRangeType.selection,
+          ],
           handler: async function (
             editor,
             range,

@@ -30,6 +30,16 @@ class HLSLanguageClient extends AutoLanguageClient {
   consumeUPI(service: UPI.IUPIRegistration) {
     this.upi = service({
       name: 'hls',
+      actions: async (editor, range, _type) => {
+        const acts = await this.getCodeActions(editor, range, [])
+        if (!acts) return undefined
+        return Promise.all(
+          acts.map(async (x) => ({
+            title: await x.getTitle(),
+            apply: () => x.apply(),
+          })),
+        )
+      },
     })
     this.consumeLinterV2(linterAdapter(this.upi, this.provideCodeActions()))
     this.consumeDatatip(datatipAdapter(service, this.upi, this.renderer))
