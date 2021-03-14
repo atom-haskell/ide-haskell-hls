@@ -43,9 +43,9 @@
         "1.0.0": "consumeMarkdownRenderer"
       }
     },
-    "busy-signal": {
+    "atom-ide-busy-signal": {
       "versions": {
-        "1.0.0": "consumeBusySignal"
+        "0.1.0": "consumeBusySignal"
       }
     },
     "console": {
