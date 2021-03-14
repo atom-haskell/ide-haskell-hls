@@ -5,6 +5,12 @@ import { datatipAdapter, LinterAdapter } from './adapters'
 import type { MarkdownService } from 'atom-ide-base'
 import { config } from './config'
 
+const severityToDiagnosticType = {
+  info: 'Info',
+  error: 'Error',
+  warning: 'Warning',
+} as const
+
 class HLSLanguageClient extends AutoLanguageClient {
   private upi?: UPI.IUPIInstance
   private renderer = { render: null as MarkdownService['render'] | null }
@@ -45,10 +51,10 @@ class HLSLanguageClient extends AutoLanguageClient {
         )
         .map((x) => ({
           filePath: x.location.file,
-          providerName: 'hls',
+          providerName: x.linterName ?? 'hls',
           range: x.location.position,
           text: x.excerpt,
-          type: 'Info' as const, // irrelevant, but required
+          type: severityToDiagnosticType[x.severity],
         }))
     }
     this.upi = service({
