@@ -1,3 +1,7 @@
+## 0.0.3
+
+-   Add HLS settings
+
 ## 0.0.2
 
 -   Remove code actions provider export (handled internally via ide-haskell)
