@@ -1,5 +1,5 @@
 import { AutoLanguageClient } from 'atom-languageclient'
-import { TextEditor, Point, Range } from 'atom'
+import { TextEditor, Point, Range, CompositeDisposable } from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import { datatipAdapter, LinterAdapter } from './adapters'
 import type { MarkdownService } from 'atom-ide-base'
@@ -18,7 +18,32 @@ class HLSLanguageClient extends AutoLanguageClient {
       | null
       | ((source: string, text: string, config: object) => Promise<string>),
   }
+  private disposables = new CompositeDisposable()
+  private linterAdapter?: LinterAdapter
   public config = config
+
+  activate() {
+    super.activate()
+    this.disposables.add(
+      atom.commands.add('atom-workspace', {
+        'ide-haskell-hls:restart-all-severs': () => {
+          this.linterAdapter?.clearMessages()
+          this.restartAllServers().catch((e) => {
+            atom.notifications.addError(e)
+          })
+        },
+        'ide-haskell-hls:clear-messages': () => {
+          this.linterAdapter?.clearMessages()
+        },
+      }),
+    )
+  }
+
+  async deactivate() {
+    this.disposables.dispose()
+    super.deactivate()
+  }
+
   getGrammarScopes() {
     return ['source.haskell']
   }
@@ -43,9 +68,9 @@ class HLSLanguageClient extends AutoLanguageClient {
   }
 
   consumeUPI(service: UPI.IUPIRegistration) {
-    let la: LinterAdapter
-    function getRelevantMessages(editor: TextEditor, range: Range) {
-      const messages = la.getMessages()
+    const getRelevantMessages = (editor: TextEditor, range: Range) => {
+      if (!this.linterAdapter) return []
+      const messages = this.linterAdapter.getMessages()
       const path = editor.getPath()
       return messages
         .filter(
@@ -86,7 +111,8 @@ class HLSLanguageClient extends AutoLanguageClient {
         },
       },
     })
-    la = new LinterAdapter(this.upi)
+    const la = new LinterAdapter(this.upi)
+    this.linterAdapter = this.linterAdapter
     this.consumeLinterV2(() => la)
     this.consumeDatatip(datatipAdapter(service, this.upi, this.renderer))
     return this.upi
