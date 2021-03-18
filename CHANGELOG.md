@@ -1,3 +1,10 @@
+## 0.0.5
+
+-   Bump dependencies
+-   Restart servers & clear messages commands
+-   Temporary hacks for markdown-service
+-   Fix busy-signal
+
 ## 0.0.4
 
 -   Split adapters
