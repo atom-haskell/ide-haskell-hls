@@ -44,6 +44,12 @@
     },
     {
       "name": "atom-ide-markdown-service"
+    },
+    {
+      "name": "atom-ide-definitions"
+    },
+    {
+      "name": "atom-ide-outline"
     }
   ],
   "consumedServices": {
