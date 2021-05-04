@@ -1,3 +1,15 @@
+## 0.0.6
+
+-   Tweak docsite link
+-   Add atom-ide packages to deps
+-   Make binary path configurable
+-   Add reference to docsite
+-   Add ide-haskell-hoogle to package deps
+-   Refactor; fix minor bugs
+-   Add package-deps
+-   Use ide-haskell's busy signal
+-   Fix: projectPath type
+
 ## 0.0.5
 
 -   Bump dependencies
