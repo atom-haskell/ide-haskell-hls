@@ -57,7 +57,7 @@ class HLSLanguageClient extends AutoLanguageClient {
     return 'ide-haskell-hls'
   }
 
-  startServerProcess(projectPath: any) {
+  startServerProcess(projectPath: string) {
     return super.spawn('haskell-language-server-wrapper', ['--lsp'], {
       cwd: projectPath,
     })
