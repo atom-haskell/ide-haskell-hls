@@ -23,6 +23,14 @@ class HLSLanguageClient extends AutoLanguageClient {
   public config = config
 
   activate() {
+    require('atom-package-deps')
+      .install('ide-haskell-hls')
+      .catch((e: Error) =>
+        atom.notifications.addFatalError(e.toString(), {
+          stack: e.stack,
+          detail: e.message,
+        }),
+      )
     super.activate()
     this.disposables.add(
       atom.commands.add('atom-workspace', {
