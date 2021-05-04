@@ -40,6 +40,9 @@
       "name": "ide-haskell"
     },
     {
+      "name": "ide-haskell-hoogle"
+    },
+    {
       "name": "atom-ide-markdown-service"
     }
   ],
