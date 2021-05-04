@@ -1,5 +1,11 @@
 import { AutoLanguageClient } from 'atom-languageclient'
-import { TextEditor, Point, Range, CompositeDisposable } from 'atom'
+import {
+  TextEditor,
+  Point,
+  Range,
+  CompositeDisposable,
+  ConfigValues,
+} from 'atom'
 import * as UPI from 'atom-haskell-upi'
 import { busyAdapter, datatipAdapter, LinterAdapter } from './adapters'
 import type { MarkdownService } from 'atom-ide-base'
@@ -64,11 +70,18 @@ class HLSLanguageClient extends AutoLanguageClient {
   getRootConfigurationKey() {
     return 'ide-haskell-hls'
   }
+  mapConfigurationObject(obj: ConfigValues['ide-haskell-hls']) {
+    return { haskell: obj.haskell }
+  }
 
   startServerProcess(projectPath: string) {
-    return super.spawn('haskell-language-server-wrapper', ['--lsp'], {
-      cwd: projectPath,
-    })
+    return super.spawn(
+      atom.config.get('ide-haskell-hls.binaryPath'),
+      ['--lsp'],
+      {
+        cwd: projectPath,
+      },
+    )
   }
 
   consumeMarkdownRenderer(renderer: MarkdownService) {
