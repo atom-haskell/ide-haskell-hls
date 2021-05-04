@@ -115,6 +115,28 @@ class HLSLanguageClient extends AutoLanguageClient {
     this.linterAdapter = this.linterAdapter
     this.consumeLinterV2(() => la)
     this.consumeDatatip(datatipAdapter(service, this.upi, this.renderer))
+    this.consumeBusySignal({
+      dispose: () => {
+        this.upi?.setStatus({ status: 'ready', detail: '' })
+      },
+      reportBusy: (title, _options?) => {
+        this.upi?.setStatus({ status: 'progress', detail: title })
+        return {
+          setTitle: (title) => {
+            this.upi?.setStatus({ status: 'progress', detail: title })
+          },
+          dispose: () => {
+            this.upi?.setStatus({ status: 'ready', detail: '' })
+          },
+        }
+      },
+      reportBusyWhile: async (title, f, _options?) => {
+        this.upi?.setStatus({ status: 'progress', detail: title })
+        const res = await f()
+        this.upi?.setStatus({ status: 'ready', detail: '' })
+        return res
+      },
+    })
     return this.upi
   }
   //////////////////////////// overrides ///////////////////////////////
