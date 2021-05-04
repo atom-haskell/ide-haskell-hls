@@ -1,7 +1,7 @@
 import { AutoLanguageClient } from 'atom-languageclient'
 import { TextEditor, Point, Range, CompositeDisposable } from 'atom'
 import * as UPI from 'atom-haskell-upi'
-import { datatipAdapter, LinterAdapter } from './adapters'
+import { busyAdapter, datatipAdapter, LinterAdapter } from './adapters'
 import type { MarkdownService } from 'atom-ide-base'
 import { config } from './config'
 
@@ -119,32 +119,11 @@ class HLSLanguageClient extends AutoLanguageClient {
         },
       },
     })
-    const la = new LinterAdapter(this.upi)
-    this.linterAdapter = this.linterAdapter
+    const la = (this.linterAdapter = new LinterAdapter(this.upi))
     this.consumeLinterV2(() => la)
     this.consumeDatatip(datatipAdapter(service, this.upi, this.renderer))
-    this.consumeBusySignal({
-      dispose: () => {
-        this.upi?.setStatus({ status: 'ready', detail: '' })
-      },
-      reportBusy: (title, _options?) => {
-        this.upi?.setStatus({ status: 'progress', detail: title })
-        return {
-          setTitle: (title) => {
-            this.upi?.setStatus({ status: 'progress', detail: title })
-          },
-          dispose: () => {
-            this.upi?.setStatus({ status: 'ready', detail: '' })
-          },
-        }
-      },
-      reportBusyWhile: async (title, f, _options?) => {
-        this.upi?.setStatus({ status: 'progress', detail: title })
-        const res = await f()
-        this.upi?.setStatus({ status: 'ready', detail: '' })
-        return res
-      },
-    })
+    this.consumeBusySignal(busyAdapter(this.upi))
+    this.disposables.add(this.upi)
     return this.upi
   }
   //////////////////////////// overrides ///////////////////////////////

@@ -6,11 +6,11 @@ export class LinterAdapter implements Linter.IndieDelegate {
   public name = 'hls'
   private emitter = new Emitter()
   private messages: Linter.Message[] = []
-  constructor(private upi: UPI.IUPIInstance) {}
+  constructor(private upi?: UPI.IUPIInstance) {}
   dispose() {
     this.emitter.emit('did-destroy')
     this.emitter.dispose()
-    this.upi.dispose()
+    this.upi = undefined
   }
   clearMessages() {
     this.messages = []
@@ -36,7 +36,7 @@ export class LinterAdapter implements Linter.IndieDelegate {
     this.updateMessages()
   }
   private updateMessages() {
-    this.upi.setMessages(this.messages.map(convertMessages))
+    this.upi?.setMessages(this.messages.map(convertMessages))
     this.emitter.emit('did-update')
   }
 }
